@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "RedLine",
+    "slug": "RedLine",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo/RedlineAppLogo.png",
+    "scheme": "RedLine",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo/RedlineAppLogo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.redline.autogarage",
+      "softwareKeyboardLayoutMode": "pan",
+      "permissions": [],
+      "jsEngine": "hermes"
+
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo/RedlineAppLogo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo/RedlineAppLogo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
