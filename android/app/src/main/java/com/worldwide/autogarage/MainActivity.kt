@@ -1,4 +1,4 @@
-package com.redline.autogarage
+package com.worldwide.autogarage
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

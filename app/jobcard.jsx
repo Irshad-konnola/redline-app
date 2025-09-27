@@ -26,7 +26,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import axiosInstance from "../api/api";
 import { Animated } from "react-native";
-
+import { FixedText } from "../components/FixedText";
 const filterOptions = [
   { label: "Priority-Low", value: "low" },
   { label: "Priority-Medium", value: "medium" },
@@ -693,14 +693,16 @@ const JobCard = () => {
         </View>
 
         <View style={styles.cardRow}>
-          <Text
+          <FixedText
+                        fontSize={14}
+
             style={[
-              styles.infoText,
-              { color: extendedTheme.colors.secondaryText },
+              styles.infoTextNo,
+              { color: extendedTheme.colors.secondaryText, },
             ]}
           >
             Mobile No: {job.mobile_number}
-          </Text>
+          </FixedText>
           <View style={styles.statusContainer}>
             <Text
               style={[
@@ -721,14 +723,16 @@ const JobCard = () => {
         </View>
 
         <View style={styles.cardRow}>
-          <Text
+          <FixedText
+                        fontSize={14}
+              numberOfLines={1}
             style={[
               styles.infoText,
               { color: extendedTheme.colors.secondaryText },
             ]}
           >
             Date In: {formatDate(job.date_in)}
-          </Text>
+          </FixedText>
           <View style={styles.priorityContainer}>
             <Text
               style={[
@@ -1155,8 +1159,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
+   infoTextNo: {
+    // fontSize: 14,
+    minHeight:35
+  },
   infoText: {
-    fontSize: 14,
+    // fontSize: 14,
+    // minHeight:35
   },
   statusContainer: {
     flexDirection: "row",

@@ -28,7 +28,7 @@ import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import { axiosInstance } from '@/constants/api.config';
 import axiosInstance from "../api/api";
-
+import { FixedText } from "../components/FixedText";
 const ValidationSchema = Yup.object().shape({
   customerName: Yup.string().required("Customer name is required"),
   mobileNumber: Yup.string()
@@ -136,8 +136,7 @@ export default function AddNewJobCard() {
   // Date states
   const [dateIn, setDateIn] = useState(new Date());
   const [deliveryDate, setDeliveryDate] = useState(null);
-  console.log(deliveryDate);
-  
+
   const [nextServiceDate, setNextServiceDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState({
     dateIn: false,
@@ -389,53 +388,6 @@ export default function AddNewJobCard() {
     setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // // Date picker handlers
-  // const toggleDatePicker = (dateType, currentValue, setFieldValue) => {
-  //   // Close all other date pickers first
-  //   setShowDatePicker(prev => {
-  //     const newState = { ...prev };
-  //     Object.keys(newState).forEach(key => {
-  //       newState[key] = false;
-  //     });
-  //     // Then open the selected one
-  //     newState[dateType] = true;
-  //     return newState;
-  //   });
-  // };
-
-  // const onDateChange = (event, selectedDate, dateType, setFieldValue) => {
-  //   // Only update the date if it's a complete selection
-  //   if (event.type === 'set' && selectedDate) {
-  //     const currentDate = selectedDate;
-
-  //     if (dateType === 'dateIn') {
-  //       setDateIn(currentDate);
-  //     } else if (dateType === 'deliveryDate') {
-  //       setDeliveryDate(currentDate);
-  //     } else if (dateType === 'nextServiceDate') {
-  //       setNextServiceDate(currentDate);
-  //     }
-  //   }
-  // };
-
-  // const handleCancelDatePicker = (dateType) => {
-  //   setShowDatePicker(prev => ({ ...prev, [dateType]: false }));
-  // };
-
-  // const handleConfirmDate = (dateType, setFieldValue) => {
-  //   if (dateType === 'dateIn') {
-  //     setFieldValue('dateIn', dateIn);
-  //   } else if (dateType === 'deliveryDate') {
-  //     setFieldValue('deliveryDate', deliveryDate);
-  //   } else if (dateType === 'nextServiceDate') {
-  //     setFieldValue('nextServiceDate', nextServiceDate);
-  //   }
-
-  //   // Close the date picker
-  //   setShowDatePicker(prev => ({ ...prev, [dateType]: false }));
-  // };
-
-  // Date picker handlers
   const toggleDatePicker = (dateType, currentValue, setFieldValue) => {
     setShowDatePicker((prev) => {
       const newState = { ...prev };
@@ -577,7 +529,7 @@ export default function AddNewJobCard() {
 
       // Create form data for the entire payload
       const formData = new FormData();
-console.log(formData,"form data");
+      console.log(formData, "form data");
 
       // Add all the regular fields
       formData.append("customer", selectedCustomer.id);
@@ -597,9 +549,18 @@ console.log(formData,"form data");
       // );
       const today = new Date().toISOString().split("T")[0];
 
-formData.append("service_date", dateIn ? dateIn.toISOString().split("T")[0] : today);
-formData.append("estimated_date", deliveryDate ? deliveryDate.toISOString().split("T")[0] : today);
-formData.append("next_service_date", nextServiceDate ? nextServiceDate.toISOString().split("T")[0] : today);
+      formData.append(
+        "service_date",
+        dateIn ? dateIn.toISOString().split("T")[0] : today
+      );
+      formData.append(
+        "estimated_date",
+        deliveryDate ? deliveryDate.toISOString().split("T")[0] : today
+      );
+      formData.append(
+        "next_service_date",
+        nextServiceDate ? nextServiceDate.toISOString().split("T")[0] : today
+      );
 
       formData.append("sub_total", calculateSubTotal().toString());
       formData.append("total_amount", calculateTotal().toString());
@@ -627,18 +588,18 @@ formData.append("next_service_date", nextServiceDate ? nextServiceDate.toISOStri
       formData.append("expenses", JSON.stringify([]));
 
       // Add vehicle images with proper file structure
-     Object.values(carImages).forEach((image) => {
-  if (image) {
-    formData.append("vehicle_images", image);
-  }
-});
+      Object.values(carImages).forEach((image) => {
+        if (image) {
+          formData.append("vehicle_images", image);
+        }
+      });
 
-// Istimara images (convert object -> array, filter nulls)
-Object.values(istimaraImages).forEach((image) => {
-  if (image) {
-    formData.append("istimara_images", image);
-  }
-});
+      // Istimara images (convert object -> array, filter nulls)
+      Object.values(istimaraImages).forEach((image) => {
+        if (image) {
+          formData.append("istimara_images", image);
+        }
+      });
       // Add additional images
       additionalImages.forEach((image, index) => {
         formData.append(`additional_images[${index}]`, image);
@@ -803,7 +764,119 @@ Object.values(istimaraImages).forEach((image) => {
       setIsAddingVehicle(false);
     }
   };
+  // fetching category service product
+  const fetchServiceCategoryProducts = async (categoryId) => {
+    try {
+      const response = await axiosInstance.get(
+        `/service-categories/${categoryId}/products/`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching service category products:", error);
+      return [];
+    }
+  };
 
+  const addProductsToJobCard = async (categoryProducts) => {
+    if (!categoryProducts || categoryProducts.length === 0) return;
+
+    try {
+      // First, ensure we have the latest products list
+      const productsResponse = await axiosInstance.get("/products/");
+      const latestProductsList = productsResponse.data.results.map(
+        (product) => ({
+          id: product.id.toString(),
+          name: product.name,
+          price: parseFloat(product.selling_price),
+          basePrice: parseFloat(product.selling_price),
+          availableQuantity: parseInt(product.quantity),
+          quantity: 1,
+          selectedGroup: null,
+        })
+      );
+
+      // Filter out products that are already selected
+      const newProducts = categoryProducts.filter((categoryProduct) => {
+        const productId = categoryProduct.product.toString();
+        return !selectedProducts.some(
+          (existingProduct) => existingProduct.id === productId
+        );
+      });
+
+      if (newProducts.length > 0) {
+        // Create product objects for the new products
+        const productsToAdd = newProducts.map((categoryProduct) => {
+          const productId = categoryProduct.product.toString();
+          const baseProduct = latestProductsList.find(
+            (p) => p.id === productId
+          );
+
+          return {
+            id: productId,
+            name: categoryProduct.product_name,
+            price: parseFloat(categoryProduct.product_price),
+            basePrice: parseFloat(categoryProduct.product_price),
+            availableQuantity: categoryProduct.product_quantity,
+            quantity: 1,
+            selectedGroup: null,
+            sku: categoryProduct.product_sku,
+          };
+        });
+
+        // Update selectedProducts
+        setSelectedProducts((prev) => [...prev, ...productsToAdd]);
+
+        // Also update productsList to include these products with proper quantity tracking
+        setProductsList((prev) => {
+          const updatedList = [...prev];
+          productsToAdd.forEach((newProduct) => {
+            const existingIndex = updatedList.findIndex(
+              (p) => p.id === newProduct.id
+            );
+            if (existingIndex === -1) {
+              // Add to productsList if not already there
+              updatedList.push({ ...newProduct });
+            } else {
+              // Update quantity if already exists
+              updatedList[existingIndex] = {
+                ...updatedList[existingIndex],
+                quantity: Math.max(updatedList[existingIndex].quantity, 1),
+              };
+            }
+          });
+          return updatedList;
+        });
+
+        // Show alert for added products
+        Alert.alert(
+          "Products Added",
+          `${newProducts.length} product(s) from service category have been added automatically.`,
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.error("Error adding products from service category:", error);
+    }
+  };
+
+  const handleMainServiceSelection = async (category) => {
+    setSelectedMainService(category);
+    setShowServiceDropdown(false);
+    setSelectedSubServices([]);
+
+    // Auto-fetch and add products when service category is selected
+    try {
+      const categoryProducts = await fetchServiceCategoryProducts(category.id);
+      if (categoryProducts && categoryProducts.length > 0) {
+        await addProductsToJobCard(categoryProducts);
+      }
+    } catch (error) {
+      console.error("Error fetching service category products:", error);
+    }
+  };
+
+  const [productGroups, setProductGroups] = useState({});
+  const [selectedGroups, setSelectedGroups] = useState({});
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
@@ -814,8 +887,10 @@ Object.values(istimaraImages).forEach((image) => {
           id: product.id.toString(),
           name: product.name,
           price: parseFloat(product.selling_price),
+          basePrice: parseFloat(product.selling_price), // Store original price
           availableQuantity: parseInt(product.quantity),
           quantity: 0,
+          selectedGroup: null, // Track selected group
         }));
         setProductsList(products);
       } catch (error) {
@@ -828,16 +903,38 @@ Object.values(istimaraImages).forEach((image) => {
 
     fetchProducts();
   }, []);
+  const fetchProductGroups = async (productId) => {
+    try {
+      const groupsResponse = await axiosInstance.get(
+        `/product-groups/by_product/?product_id=${productId}`
+      );
+      setProductGroups((prev) => ({
+        ...prev,
+        [productId]: groupsResponse.data,
+      }));
+    } catch (error) {
+      console.error("Error fetching product groups:", error);
+    }
+  };
 
-  // Handle product quantity change with validation
   const handleQuantityChange = (productId, change) => {
+    const productInList = productsList.find((p) => p.id === productId);
+    if (!productInList) {
+      console.warn(`Product with id ${productId} not found in productsList`);
+      return;
+    }
+
+    const newQuantity = Math.max(
+      1,
+      Math.min(
+        productInList.availableQuantity,
+        (productInList.quantity || 1) + change
+      )
+    );
+
     setProductsList((prev) =>
       prev.map((product) => {
         if (product.id === productId) {
-          const newQuantity = Math.max(
-            1,
-            Math.min(product.availableQuantity, product.quantity + change)
-          );
           return { ...product, quantity: newQuantity };
         }
         return product;
@@ -848,10 +945,6 @@ Object.values(istimaraImages).forEach((image) => {
     setSelectedModalProducts((prev) =>
       prev.map((product) => {
         if (product.id === productId) {
-          const newQuantity = Math.max(
-            1,
-            Math.min(product.availableQuantity, product.quantity + change)
-          );
           return { ...product, quantity: newQuantity };
         }
         return product;
@@ -860,24 +953,43 @@ Object.values(istimaraImages).forEach((image) => {
   };
 
   // Handle product selection
-  const toggleProductSelection = (product) => {
+  const toggleProductSelection = async (product) => {
     setSelectedModalProducts((prev) => {
       const isSelected = prev.some((p) => p.id === product.id);
       if (isSelected) {
-        // Remove product and reset its quantity
+        // Remove product and reset its quantity and group
         setProductsList((prevList) =>
-          prevList.map((p) => (p.id === product.id ? { ...p, quantity: 1 } : p))
+          prevList.map((p) =>
+            p.id === product.id
+              ? {
+                  ...p,
+                  quantity: 1,
+                  selectedGroup: null,
+                  price: p.basePrice, // Reset to base price
+                }
+              : p
+          )
         );
+        // Remove from selected groups
+        setSelectedGroups((prev) => {
+          const newGroups = { ...prev };
+          delete newGroups[product.id];
+          return newGroups;
+        });
         return prev.filter((p) => p.id !== product.id);
       } else {
         // Add product with quantity 1 if available
         if (product.availableQuantity > 0) {
           setProductsList((prevList) =>
             prevList.map((p) =>
-              p.id === product.id ? { ...p, quantity: 1 } : p
+              p.id === product.id
+                ? { ...p, quantity: 1, selectedGroup: null }
+                : p
             )
           );
-          return [...prev, { ...product, quantity: 1 }];
+          // Fetch groups for this product
+          fetchProductGroups(product.id);
+          return [...prev, { ...product, quantity: 1, selectedGroup: null }];
         } else {
           Alert.alert("Out of Stock", "This product is currently out of stock");
           return prev;
@@ -885,7 +997,46 @@ Object.values(istimaraImages).forEach((image) => {
       }
     });
   };
+  const handleGroupSelection = (productId, groupId) => {
+    const groups = productGroups[productId] || [];
+    let newPrice;
+    let selectedGroup;
 
+    if (groupId === "none-selected" || !groupId) {
+      // Reset to base price when no group is selected
+      const product = productsList.find((p) => p.id === productId);
+      newPrice = product ? product.basePrice : 0;
+      selectedGroup = null;
+    } else {
+      // Set price from selected group
+      selectedGroup = groups.find((g) => g.id.toString() === groupId);
+      newPrice = selectedGroup ? parseFloat(selectedGroup.selling_price) : 0;
+    }
+
+    // Update product in productsList
+    setProductsList((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? { ...p, price: newPrice, selectedGroup: selectedGroup }
+          : p
+      )
+    );
+
+    // Update selected modal products
+    setSelectedModalProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? { ...p, price: newPrice, selectedGroup: selectedGroup }
+          : p
+      )
+    );
+
+    // Store selected group
+    setSelectedGroups((prev) => ({
+      ...prev,
+      [productId]: groupId === "none-selected" ? null : groupId,
+    }));
+  };
   // Handle adding selected products
   const handleAddProducts = () => {
     const productsWithQuantities = selectedModalProducts.map((product) => {
@@ -897,9 +1048,11 @@ Object.values(istimaraImages).forEach((image) => {
   };
 
   // Reset modal state when opening
+  // Reset modal state when opening
   const openProductModal = () => {
     setShowProductModal(true);
     setIsLoadingProducts(true);
+
     axiosInstance
       .get("/products/")
       .then((response) => {
@@ -907,21 +1060,39 @@ Object.values(istimaraImages).forEach((image) => {
           id: product.id.toString(),
           name: product.name,
           price: parseFloat(product.selling_price),
+          basePrice: parseFloat(product.selling_price),
           availableQuantity: parseInt(product.quantity),
           quantity: 1,
+          selectedGroup: null,
         }));
 
-        // Initialize selected products and quantities
-        setProductsList(
-          products.map((product) => {
-            const selectedProduct = selectedProducts.find(
-              (p) => p.id === product.id
-            );
-            return selectedProduct
-              ? { ...product, quantity: selectedProduct.quantity }
-              : product;
-          })
-        );
+        // Merge with existing selected products to preserve quantities
+        const mergedProductsList = products.map((product) => {
+          const selectedProduct = selectedProducts.find(
+            (p) => p.id === product.id
+          );
+          if (selectedProduct) {
+            return {
+              ...product,
+              quantity: selectedProduct.quantity,
+              price: selectedProduct.price,
+              selectedGroup: selectedProduct.selectedGroup || null,
+            };
+          }
+          return product;
+        });
+
+        // Add any selected products that might not be in the API response
+        selectedProducts.forEach((selectedProduct) => {
+          if (!mergedProductsList.find((p) => p.id === selectedProduct.id)) {
+            mergedProductsList.push({
+              ...selectedProduct,
+              basePrice: selectedProduct.price,
+            });
+          }
+        });
+
+        setProductsList(mergedProductsList);
         setSelectedModalProducts(selectedProducts);
       })
       .catch((error) => {
@@ -933,15 +1104,14 @@ Object.values(istimaraImages).forEach((image) => {
       });
   };
 
-  // Calculate products total
   const calculateProductsTotal = (products) => {
     return products.reduce((sum, product) => {
-      // Find the current quantity from productsList for modal products
       const currentProduct = productsList.find((p) => p.id === product.id);
       const quantity = currentProduct
-        ? currentProduct.quantity
-        : product.quantity;
-      return sum + product.price * quantity;
+        ? currentProduct.quantity || 1
+        : product.quantity || 1;
+      const price = product.price || 0;
+      return sum + price * quantity;
     }, 0);
   };
 
@@ -1021,10 +1191,25 @@ Object.values(istimaraImages).forEach((image) => {
   const [customerSearchQuery, setCustomerSearchQuery] = useState("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [allCustomers, setAllCustomers] = useState([]);
+
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerMobile, setNewCustomerMobile] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  const fetchAllCustomers = async () => {
+    try {
+      const response = await axiosInstance.get("/clients/");
+      setAllCustomers(response.data.results);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllCustomers();
+  }, []);
 
   // Add these functions after the existing function declarations
   const handleCustomerSearch = async (text) => {
@@ -1040,9 +1225,20 @@ Object.values(istimaraImages).forEach((image) => {
         console.error("Error searching customers:", error);
         Alert.alert("Error", "Failed to search customers");
       }
+    } else if (text.length === 0) {
+      // Show all customers when search is empty
+      setCustomers(allCustomers);
+      setShowCustomerDropdown(true);
     } else {
       setCustomers([]);
       setShowCustomerDropdown(false);
+    }
+  };
+
+  const handleInputFocus = () => {
+    if (customerSearchQuery.length === 0 && allCustomers.length > 0) {
+      setCustomers(allCustomers);
+      setShowCustomerDropdown(true);
     }
   };
 
@@ -1102,25 +1298,35 @@ Object.values(istimaraImages).forEach((image) => {
   // Add loading state
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
 
-  const handleAddNewCustomer = async () => {
+  const handleAddNewCustomer = async (setFieldValue) => {
     if (!newCustomerName.trim() || !newCustomerMobile.trim()) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
+    const fullMobileNumber = `+974${newCustomerMobile}`;
 
     setIsAddingCustomer(true);
     try {
       const response = await axiosInstance.post("/clients/", {
         name: newCustomerName.trim(),
-        mobile_number: newCustomerMobile.trim(),
+        mobile_number: fullMobileNumber.trim(),
         opening_balance: 0,
       });
+      const updatedCustomers = [...allCustomers, response.data];
+      setAllCustomers(updatedCustomers);
+      setCustomers(updatedCustomers);
 
-      setSelectedCustomer(response.data);
+      // Select the newly added customer
+      handleSelectCustomer(response.data, setFieldValue);
+
       setShowAddCustomerModal(false);
       setNewCustomerName("");
       setNewCustomerMobile("");
-      setCustomerSearchQuery(response.data.name); // Set the search query to the new customer's name
+      // setSelectedCustomer(response.data);
+      // setShowAddCustomerModal(false);
+      // setNewCustomerName("");
+      // setNewCustomerMobile("");
+      // setCustomerSearchQuery(response.data.name); // Set the search query to the new customer's name
     } catch (error) {
       console.error("Error adding customer:", error);
       Alert.alert("Error", "Failed to add customer");
@@ -1129,9 +1335,21 @@ Object.values(istimaraImages).forEach((image) => {
     }
   };
 
-  // Function to handle vehicle name search
+  const fetchAllVehicles = async () => {
+    setIsSearchingVehicleName(true);
+    try {
+      const response = await axiosInstance.get("/vehicles/");
+      setAvailableVehicles(response.data.results);
+      setFilteredAvailableVehicles(response.data.results);
+    } catch (error) {
+      console.error("Error fetching all vehicles:", error);
+    } finally {
+      setIsSearchingVehicleName(false);
+    }
+  };
   const handleVehicleNameSearch = async (text) => {
     setVehicleNameSearchQuery(text);
+
     if (text.length >= 2) {
       setIsSearchingVehicleName(true);
       try {
@@ -1145,12 +1363,33 @@ Object.values(istimaraImages).forEach((image) => {
       } finally {
         setIsSearchingVehicleName(false);
       }
+    } else if (text.length === 0) {
+      // Fetch all vehicles when search is empty
+      setIsSearchingVehicleName(true);
+      try {
+        const response = await axiosInstance.get("/vehicles/");
+        setAvailableVehicles(response.data.results);
+        setFilteredAvailableVehicles(response.data.results);
+      } catch (error) {
+        console.error("Error fetching all vehicles:", error);
+      } finally {
+        setIsSearchingVehicleName(false);
+      }
     } else {
-      setAvailableVehicles([]);
-      setFilteredAvailableVehicles([]);
+      // For 1 character, you can choose to show all or nothing
+      // Let's show all vehicles for 1 character as well
+      setIsSearchingVehicleName(true);
+      try {
+        const response = await axiosInstance.get("/vehicles/");
+        setAvailableVehicles(response.data.results);
+        setFilteredAvailableVehicles(response.data.results);
+      } catch (error) {
+        console.error("Error fetching all vehicles:", error);
+      } finally {
+        setIsSearchingVehicleName(false);
+      }
     }
   };
-
   // Function to handle vehicle name selection
   const handleSelectVehicleName = (vehicle) => {
     setSelectedVehicleName(vehicle);
@@ -1160,8 +1399,17 @@ Object.values(istimaraImages).forEach((image) => {
   };
 
   // Function to handle search input focus
+  // Function to handle search input focus
   const handleSearchFocus = () => {
     setShowVehicleNameDropdown(true);
+
+    // Fetch all vehicles when dropdown opens for the first time
+    if (availableVehicles.length === 0) {
+      fetchAllVehicles();
+    } else {
+      // If we already have vehicles, ensure we're showing them
+      setFilteredAvailableVehicles(availableVehicles);
+    }
   };
 
   // Function to handle search input blur
@@ -1170,13 +1418,21 @@ Object.values(istimaraImages).forEach((image) => {
   };
 
   // Function to handle search input change
+  // Function to handle search input change
   const handleSearchChange = (text) => {
     setVehicleNameSearchQuery(text);
+
     if (text.length >= 2) {
       handleVehicleNameSearch(text);
+    } else if (text.length === 0) {
+      // Show all vehicles when search is cleared
+      setFilteredAvailableVehicles(availableVehicles);
     } else {
-      setAvailableVehicles([]);
-      setFilteredAvailableVehicles([]);
+      // For 1 character, filter locally from already loaded vehicles
+      const filtered = availableVehicles.filter((vehicle) =>
+        vehicle.vehicle_name.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredAvailableVehicles(filtered);
     }
   };
 
@@ -1527,14 +1783,16 @@ Object.values(istimaraImages).forEach((image) => {
                                   size={32}
                                   color={theme.placeholderColor}
                                 />
-                                <Text
+                                <FixedText
+                                  fontSize={12}
+                                  numberOfLines={1}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
                                   Back View
-                                </Text>
+                                </FixedText>
                               </View>
                             )}
                           </>
@@ -1569,14 +1827,16 @@ Object.values(istimaraImages).forEach((image) => {
                                   size={32}
                                   color={theme.placeholderColor}
                                 />
-                                <Text
+                                <FixedText
+                                  fontSize={12}
+                                  numberOfLines={1}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
                                   Left View
-                                </Text>
+                                </FixedText>
                               </View>
                             )}
                           </>
@@ -1608,14 +1868,16 @@ Object.values(istimaraImages).forEach((image) => {
                                   size={32}
                                   color={theme.placeholderColor}
                                 />
-                                <Text
+                                <FixedText
+                                  fontSize={12}
+                                  numberOfLines={1}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
                                   Right View
-                                </Text>
+                                </FixedText>
                               </View>
                             )}
                           </>
@@ -1623,7 +1885,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </TouchableOpacity>
                     </View>
                   </View>
-
                   {/* Istimara Images Section */}
                   <Text
                     style={[styles.sectionTitle, { color: theme.textColor }]}
@@ -1710,7 +1971,6 @@ Object.values(istimaraImages).forEach((image) => {
                       )}
                     </TouchableOpacity>
                   </View>
-
                   {/* Chase Number Field */}
                   <View style={{ marginTop: 16 }}>
                     <Text
@@ -1737,7 +1997,6 @@ Object.values(istimaraImages).forEach((image) => {
                       }
                     />
                   </View>
-
                   {/* Vehicle Kilometers Field */}
                   <View style={{ marginTop: 16 }}>
                     <Text
@@ -1765,7 +2024,6 @@ Object.values(istimaraImages).forEach((image) => {
                       }
                     />
                   </View>
-
                   {/* Service Selection Section */}
                   <View style={styles.sectionHeader}>
                     <Text
@@ -1792,7 +2050,6 @@ Object.values(istimaraImages).forEach((image) => {
                       Add Service
                     </Text>
                   </TouchableOpacity>
-
                   {/* Added Services List */}
                   {addedServices.length > 0 && (
                     <View style={styles.selectedItemsSection}>
@@ -1888,7 +2145,6 @@ Object.values(istimaraImages).forEach((image) => {
                       ))}
                     </View>
                   )}
-
                   {/* Service Note Modal */}
                   <Modal
                     visible={showNoteModal}
@@ -1998,7 +2254,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     </TouchableOpacity>
                   </Modal>
-
                   {/* Services Total */}
                   {addedServices.length > 0 && (
                     <View style={styles.servicesTotalContainer}>
@@ -2011,7 +2266,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </Text>
                     </View>
                   )}
-
                   {/* Service Selection Modal */}
                   <Modal
                     visible={showServiceModal}
@@ -2111,11 +2365,9 @@ Object.values(istimaraImages).forEach((image) => {
                                   <TouchableOpacity
                                     key={category.id}
                                     style={styles.dropdownItem}
-                                    onPress={() => {
-                                      setSelectedMainService(category);
-                                      setShowServiceDropdown(false);
-                                      setSelectedSubServices([]);
-                                    }}
+                                    onPress={() =>
+                                      handleMainServiceSelection(category)
+                                    }
                                   >
                                     <Text style={{ color: theme.textColor }}>
                                       {category.name}
@@ -2219,7 +2471,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     </TouchableOpacity>
                   </Modal>
-
                   {/* Product Selection Section */}
                   <View style={styles.sectionHeader}>
                     <Text
@@ -2246,7 +2497,6 @@ Object.values(istimaraImages).forEach((image) => {
                       Add Products
                     </Text>
                   </TouchableOpacity>
-
                   {selectedProducts.length > 0 && (
                     <View style={styles.selectedItemsSection}>
                       <TouchableOpacity
@@ -2264,8 +2514,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </TouchableOpacity>
                     </View>
                   )}
-
-                  {/* Products Selection Modal */}
                   <Modal
                     visible={showProductModal}
                     transparent={true}
@@ -2348,8 +2596,11 @@ Object.values(istimaraImages).forEach((image) => {
                                       selectedModalProducts.some(
                                         (p) => p.id === product.id
                                       );
+                                    const availableGroups =
+                                      productGroups[product.id] || [];
+
                                     return (
-                                      <TouchableOpacity
+                                      <View
                                         key={product.id}
                                         style={[
                                           styles.productItem,
@@ -2367,127 +2618,258 @@ Object.values(istimaraImages).forEach((image) => {
                                           product.availableQuantity === 0 &&
                                             styles.productItemDisabled,
                                         ]}
-                                        onPress={() =>
-                                          toggleProductSelection(product)
-                                        }
-                                        disabled={
-                                          product.availableQuantity === 0
-                                        }
                                       >
-                                        <View style={styles.productInfo}>
-                                          <Text
-                                            style={[
-                                              styles.productName,
-                                              {
-                                                color: theme.textColor,
-                                                opacity:
-                                                  product.availableQuantity ===
-                                                  0
-                                                    ? 0.5
-                                                    : 1,
-                                              },
-                                            ]}
-                                            numberOfLines={1}
-                                          >
-                                            {product.name}
-                                          </Text>
-                                          <View style={styles.productDetails}>
+                                        {/* Main Product Row */}
+                                        <TouchableOpacity
+                                          style={styles.productMainContent}
+                                          onPress={() =>
+                                            toggleProductSelection(product)
+                                          }
+                                          disabled={
+                                            product.availableQuantity === 0
+                                          }
+                                        >
+                                          <View style={styles.productInfo}>
                                             <Text
                                               style={[
-                                                styles.productPrice,
+                                                styles.productName,
                                                 {
-                                                  color: isDark
-                                                    ? "#63B3ED"
-                                                    : "#2196F3",
+                                                  color: theme.textColor,
+                                                  opacity:
+                                                    product.availableQuantity ===
+                                                    0
+                                                      ? 0.5
+                                                      : 1,
                                                 },
                                               ]}
+                                              numberOfLines={1}
                                             >
-                                              QAR {product.price}
+                                              {product.name}
                                             </Text>
-                                            <Text
-                                              style={[
-                                                styles.availableQuantity,
-                                                {
-                                                  color: theme.placeholderColor,
-                                                },
-                                              ]}
-                                            >
-                                              Available:{" "}
-                                              {product.availableQuantity}
-                                            </Text>
+                                            <View style={styles.productDetails}>
+                                              <FixedText
+                                                fontSize={12}
+                                                numberOfLines={1}
+                                               style={[
+      styles.productPrice,
+      {
+        color: isDark ? "#63B3ED" : "#2196F3",
+        flex: 1, // Allow it to take available space
+        marginRight: 10, // Add some spacing
+      },
+    ]}
+                                              >
+                                                QAR {product.price}
+                                              </FixedText>
+                                              <FixedText
+                                                fontSize={12}
+                                                numberOfLines={1}
+                                                style={[
+                                                  styles.availableQuantity,
+                                                  {
+                                                    color:
+                                                      theme.placeholderColor,
+                                                      flexShrink: 0,
+                                                  },
+                                                ]}
+                                              >
+                                                Available:{" "}
+                                                {product.availableQuantity}
+                                              </FixedText>
+                                            </View>
                                           </View>
-                                        </View>
-                                        {isSelected && (
-                                          <View
-                                            style={[
-                                              styles.quantityControl,
-                                              {
-                                                backgroundColor: isDark
-                                                  ? "#1e1e1e"
-                                                  : "#fff",
-                                              },
-                                            ]}
-                                          >
-                                            <TouchableOpacity
+
+                                          {isSelected && (
+                                            <View
                                               style={[
-                                                styles.quantityButton,
+                                                styles.quantityControl,
                                                 {
-                                                  backgroundColor:
-                                                    theme.buttonBackground,
+                                                  backgroundColor: isDark
+                                                    ? "#1e1e1e"
+                                                    : "#fff",
                                                 },
                                               ]}
-                                              onPress={(e) => {
-                                                e.stopPropagation();
-                                                handleQuantityChange(
-                                                  product.id,
-                                                  -1
-                                                );
-                                              }}
                                             >
-                                              <AntDesign
-                                                name="minus"
-                                                size={16}
-                                                color="#fff"
-                                              />
-                                            </TouchableOpacity>
-                                            <Text
-                                              style={[
-                                                styles.quantityText,
-                                                { color: theme.textColor },
-                                              ]}
-                                            >
-                                              {product.quantity}
-                                            </Text>
-                                            <TouchableOpacity
-                                              style={[
-                                                styles.quantityButton,
-                                                {
-                                                  backgroundColor:
-                                                    theme.buttonBackground,
-                                                },
-                                              ]}
-                                              onPress={(e) => {
-                                                e.stopPropagation();
-                                                if (
-                                                  product.quantity <
-                                                  product.availableQuantity
-                                                ) {
+                                              <TouchableOpacity
+                                                style={[
+                                                  styles.quantityButton,
+                                                  {
+                                                    backgroundColor:
+                                                      theme.buttonBackground,
+                                                  },
+                                                ]}
+                                                onPress={(e) => {
+                                                  e.stopPropagation();
                                                   handleQuantityChange(
                                                     product.id,
-                                                    1
+                                                    -1
                                                   );
+                                                }}
+                                              >
+                                                <AntDesign
+                                                  name="minus"
+                                                  size={16}
+                                                  color="#fff"
+                                                />
+                                              </TouchableOpacity>
+                                              <Text
+                                                style={[
+                                                  styles.quantityText,
+                                                  { color: theme.textColor },
+                                                ]}
+                                              >
+                                                {product.quantity || 1}
+                                              </Text>
+                                              <TouchableOpacity
+                                                style={[
+                                                  styles.quantityButton,
+                                                  {
+                                                    backgroundColor:
+                                                      theme.buttonBackground,
+                                                  },
+                                                ]}
+                                                onPress={(e) => {
+                                                  e.stopPropagation();
+                                                  if (
+                                                    (product.quantity || 1) <
+                                                    product.availableQuantity
+                                                  ) {
+                                                    handleQuantityChange(
+                                                      product.id,
+                                                      1
+                                                    );
+                                                  }
+                                                }}
+                                              >
+                                                <AntDesign
+                                                  name="plus"
+                                                  size={16}
+                                                  color="#fff"
+                                                />
+                                              </TouchableOpacity>
+                                            </View>
+                                          )}
+                                        </TouchableOpacity>
+                                        {isSelected &&
+                                          availableGroups.length > 0 && (
+                                            <View style={styles.groupSelection}>
+                                              <Text
+                                                style={[
+                                                  styles.groupLabel,
+                                                  { color: theme.textColor },
+                                                ]}
+                                              >
+                                                Select Group:
+                                              </Text>
+                                              <ScrollView
+                                                horizontal
+                                                style={styles.groupScrollView}
+                                                showsHorizontalScrollIndicator={
+                                                  false
                                                 }
-                                              }}
-                                            >
-                                              <AntDesign
-                                                name="plus"
-                                                size={16}
-                                                color="#fff"
-                                              />
-                                            </TouchableOpacity>
-                                          </View>
-                                        )}
-                                      </TouchableOpacity>
+                                              >
+                                                <TouchableOpacity
+                                                  style={[
+                                                    styles.groupButton,
+                                                    {
+                                                      backgroundColor:
+                                                        !selectedGroups[
+                                                          product.id
+                                                        ]
+                                                          ? theme.buttonBackground
+                                                          : isDark
+                                                          ? "#444"
+                                                          : "#E0E0E0",
+                                                    },
+                                                  ]}
+                                                  onPress={() =>
+                                                    handleGroupSelection(
+                                                      product.id,
+                                                      "none-selected"
+                                                    )
+                                                  }
+                                                >
+                                                  <Text
+                                                    style={[
+                                                      styles.groupButtonText,
+                                                      {
+                                                        color: !selectedGroups[
+                                                          product.id
+                                                        ]
+                                                          ? "#fff"
+                                                          : theme.textColor,
+                                                      },
+                                                    ]}
+                                                  >
+                                                    None
+                                                  </Text>
+                                                </TouchableOpacity>
+
+                                                {availableGroups.map(
+                                                  (group) => (
+                                                    <TouchableOpacity
+                                                      key={group.id}
+                                                      style={[
+                                                        styles.groupButton,
+                                                        {
+                                                          backgroundColor:
+                                                            selectedGroups[
+                                                              product.id
+                                                            ] ===
+                                                            group.id.toString()
+                                                              ? theme.buttonBackground
+                                                              : isDark
+                                                              ? "#444"
+                                                              : "#E0E0E0",
+                                                        },
+                                                      ]}
+                                                      onPress={() =>
+                                                        handleGroupSelection(
+                                                          product.id,
+                                                          group.id.toString()
+                                                        )
+                                                      }
+                                                    >
+                                                      <Text
+                                                        style={[
+                                                          styles.groupButtonText,
+                                                          {
+                                                            color:
+                                                              selectedGroups[
+                                                                product.id
+                                                              ] ===
+                                                              group.id.toString()
+                                                                ? "#fff"
+                                                                : theme.textColor,
+                                                          },
+                                                        ]}
+                                                      >
+                                                        {group.name}
+                                                      </Text>
+                                                      <Text
+                                                        style={[
+                                                          styles.groupPriceText,
+                                                          {
+                                                            color:
+                                                              selectedGroups[
+                                                                product.id
+                                                              ] ===
+                                                              group.id.toString()
+                                                                ? "#fff"
+                                                                : theme.placeholderColor,
+                                                          },
+                                                        ]}
+                                                      >
+                                                        QAR{" "}
+                                                        {group.selling_price}
+                                                      </Text>
+                                                    </TouchableOpacity>
+                                                  )
+                                                )}
+                                              </ScrollView>
+                                            </View>
+                                          )}
+                                      </View>
                                     );
                                   })
                                 )}
@@ -2541,7 +2923,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     </TouchableWithoutFeedback>
                   </Modal>
-
                   {/* Customer Information Section */}
                   <Text
                     style={[styles.sectionTitle, { color: theme.textColor }]}
@@ -2570,6 +2951,7 @@ Object.values(istimaraImages).forEach((image) => {
                             placeholderTextColor={theme.placeholderColor}
                             value={customerSearchQuery}
                             onChangeText={handleCustomerSearch}
+                            onFocus={handleInputFocus}
                           />
                         </View>
                         {showCustomerDropdown && (
@@ -2647,8 +3029,8 @@ Object.values(istimaraImages).forEach((image) => {
                               styles.selectedCustomerName,
                               { color: theme.textColor },
                             ]}
-                             numberOfLines={1}
-        ellipsizeMode="tail"
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
                           >
                             {selectedCustomer.name}
                           </Text>
@@ -2657,8 +3039,8 @@ Object.values(istimaraImages).forEach((image) => {
                               styles.selectedCustomerMobile,
                               { color: isDark ? "#63B3ED" : "#2196F3" },
                             ]}
-                             numberOfLines={1}
-        ellipsizeMode="tail"
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
                           >
                             {selectedCustomer.mobile_number}
                           </Text>
@@ -2666,8 +3048,8 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     )}
                   </View>
-
                   {/* Add Customer Modal */}
+                  // Update the modal section with country code
                   <Modal
                     visible={showAddCustomerModal}
                     transparent={true}
@@ -2708,20 +3090,43 @@ Object.values(istimaraImages).forEach((image) => {
                           onChangeText={setNewCustomerName}
                         />
 
-                        <TextInput
-                          style={[
-                            styles.input,
-                            {
-                              borderColor: theme.borderColor,
-                              color: theme.textColor,
-                            },
-                          ]}
-                          placeholder="Mobile Number"
-                          placeholderTextColor={theme.placeholderColor}
-                          keyboardType="numeric"
-                          value={newCustomerMobile}
-                          onChangeText={setNewCustomerMobile}
-                        />
+                        <View style={styles.phoneInputContainer}>
+                          <View
+                            style={[
+                              styles.countryCodeContainer,
+                              { borderColor: theme.borderColor },
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.countryCodeText,
+                                { color: theme.textColor },
+                              ]}
+                            >
+                              +974
+                            </Text>
+                          </View>
+                          <TextInput
+                            style={[
+                              styles.phoneInput,
+                              {
+                                borderColor: theme.borderColor,
+                                color: theme.textColor,
+                              },
+                            ]}
+                            placeholder="Mobile Number"
+                            placeholderTextColor={theme.placeholderColor}
+                            keyboardType="numeric"
+                            value={newCustomerMobile}
+                            onChangeText={(text) => {
+                              // Remove any non-digit characters and limit to 8 digits (Qatar numbers are 8 digits after +974)
+                              const cleanedText = text
+                                .replace(/[^\d]/g, "")
+                                .slice(0, 8);
+                              setNewCustomerMobile(cleanedText);
+                            }}
+                          />
+                        </View>
 
                         <View style={styles.modalButtons}>
                           <TouchableOpacity
@@ -2750,7 +3155,7 @@ Object.values(istimaraImages).forEach((image) => {
                               styles.modalButton,
                               { backgroundColor: theme.buttonBackground },
                             ]}
-                            onPress={handleAddNewCustomer}
+                            onPress={() => handleAddNewCustomer(setFieldValue)}
                             disabled={isAddingCustomer}
                           >
                             {isAddingCustomer ? (
@@ -2770,7 +3175,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     </TouchableOpacity>
                   </Modal>
-
                   {/* Vehicle Information Section */}
                   <Text
                     style={[styles.sectionTitle, { color: theme.textColor }]}
@@ -3027,9 +3431,19 @@ Object.values(istimaraImages).forEach((image) => {
                                       },
                                     ]}
                                     onPress={() => {
-                                      setShowVehicleNameDropdown(
-                                        !showVehicleNameDropdown
-                                      );
+                                      const newState = !showVehicleNameDropdown;
+                                      setShowVehicleNameDropdown(newState);
+
+                                      if (newState) {
+                                        // When opening dropdown, fetch all vehicles if not already loaded
+                                        if (availableVehicles.length === 0) {
+                                          fetchAllVehicles();
+                                        } else {
+                                          setFilteredAvailableVehicles(
+                                            availableVehicles
+                                          );
+                                        }
+                                      }
                                     }}
                                   >
                                     <Text
@@ -3113,45 +3527,63 @@ Object.values(istimaraImages).forEach((image) => {
                                                   { color: theme.textColor },
                                                 ]}
                                               >
-                                                Searching vehicles...
+                                                {vehicleNameSearchQuery
+                                                  ? "Searching vehicles..."
+                                                  : "Loading vehicles..."}
                                               </Text>
                                             </View>
                                           ) : filteredAvailableVehicles.length >
                                             0 ? (
-                                            filteredAvailableVehicles.map(
-                                              (vehicle) => (
-                                                <TouchableOpacity
-                                                  key={vehicle.id}
-                                                  style={[
-                                                    styles.vehicleNameDropdownItem,
-                                                    {
-                                                      borderBottomColor: isDark
-                                                        ? "#444444"
-                                                        : "#eeeeee",
-                                                      backgroundColor:
-                                                        selectedVehicleName?.id ===
-                                                        vehicle.id
-                                                          ? isDark
-                                                            ? "#2a2a2a"
-                                                            : "#f0f8ff"
-                                                          : "transparent",
-                                                    },
-                                                  ]}
-                                                  onPress={handleDropdownItemPress(
-                                                    vehicle
-                                                  )}
-                                                  activeOpacity={0.7}
-                                                >
-                                                  <Text
-                                                    style={{
-                                                      color: theme.textColor,
-                                                    }}
+                                            <>
+                                              <Text
+                                                style={[
+                                                  styles.dropdownInfoText,
+                                                  {
+                                                    color:
+                                                      theme.placeholderColor,
+                                                  },
+                                                ]}
+                                              >
+                                                {vehicleNameSearchQuery
+                                                  ? `Found ${filteredAvailableVehicles.length} vehicles`
+                                                  : `Showing all ${filteredAvailableVehicles.length} vehicles`}
+                                              </Text>
+                                              {filteredAvailableVehicles.map(
+                                                (vehicle) => (
+                                                  <TouchableOpacity
+                                                    key={vehicle.id}
+                                                    style={[
+                                                      styles.vehicleNameDropdownItem,
+                                                      {
+                                                        borderBottomColor:
+                                                          isDark
+                                                            ? "#444444"
+                                                            : "#eeeeee",
+                                                        backgroundColor:
+                                                          selectedVehicleName?.id ===
+                                                          vehicle.id
+                                                            ? isDark
+                                                              ? "#2a2a2a"
+                                                              : "#f0f8ff"
+                                                            : "transparent",
+                                                      },
+                                                    ]}
+                                                    onPress={handleDropdownItemPress(
+                                                      vehicle
+                                                    )}
+                                                    activeOpacity={0.7}
                                                   >
-                                                    {vehicle.vehicle_name}
-                                                  </Text>
-                                                </TouchableOpacity>
-                                              )
-                                            )
+                                                    <Text
+                                                      style={{
+                                                        color: theme.textColor,
+                                                      }}
+                                                    >
+                                                      {vehicle.vehicle_name}
+                                                    </Text>
+                                                  </TouchableOpacity>
+                                                )
+                                              )}
+                                            </>
                                           ) : (
                                             <Text
                                               style={[
@@ -3163,7 +3595,9 @@ Object.values(istimaraImages).forEach((image) => {
                                                 },
                                               ]}
                                             >
-                                              No vehicles found
+                                              {vehicleNameSearchQuery
+                                                ? "No vehicles found matching your search"
+                                                : "No vehicles available"}
                                             </Text>
                                           )}
                                         </ScrollView>
@@ -3415,7 +3849,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </KeyboardAvoidingView>
                     </Modal>
                   </View>
-
                   {/* Service Information Section */}
                   <Text
                     style={[styles.sectionTitle, { color: theme.textColor }]}
@@ -3893,7 +4326,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </View>
                     </View>
                   </View>
-
                   {/* Additional Images Section */}
                   <Text
                     style={[styles.sectionTitle, { color: theme.textColor }]}
@@ -3955,7 +4387,6 @@ Object.values(istimaraImages).forEach((image) => {
                       )}
                     </ScrollView>
                   </View>
-
                   {/* Common Note Section */}
                   <Text
                     style={[
@@ -3980,7 +4411,6 @@ Object.values(istimaraImages).forEach((image) => {
                     value={commonNoteValue}
                     onChangeText={setCommonNoteValue}
                   />
-
                   {/* Payment Information */}
                   <View
                     style={[
@@ -4098,7 +4528,6 @@ Object.values(istimaraImages).forEach((image) => {
                       </Text>
                     </View>
                   </View>
-
                   {/* Action Buttons */}
                   <View style={styles.buttonContainer}>
                     <TouchableOpacity
@@ -4269,6 +4698,13 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: "center",
     alignItems: "center",
+  },
+  dropdownInfoText: {
+    padding: 10,
+    fontSize: 12,
+    fontStyle: "italic",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eeeeee",
   },
   addImageButton: {
     width: 120,
@@ -4848,12 +5284,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   productItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column", // changed from row
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
     padding: 12,
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 12,
     backgroundColor: "#F5F5F5",
   },
   productItemSelected: {
@@ -4874,11 +5310,69 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   productPrice: {
-    fontSize: 14,
     color: "#2196F3",
   },
+  productMainContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingBottom: 8, // Add padding for better spacing
+  },
+  groupSelection: {
+    paddingTop: 12,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)", // More subtle border
+    backgroundColor: "rgba(0, 0, 0, 0.1)", // Slight background for separation
+    borderRadius: 8,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  groupLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  groupScrollView: {
+    flexDirection: "row",
+    paddingBottom: 4,
+    flexGrow: 0,
+  },
+  groupButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 18,
+    borderRadius: 12, // More rounded for better look
+    marginRight: 10,
+    minWidth: 70,
+    maxWidth: 100,
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2, // For Android shadow
+    flexShrink: 0,
+  },
+  groupButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  groupPriceText: {
+    fontSize: 10,
+    marginTop: 2,
+    fontWeight: "500",
+    textAlign: "center",
+  },
   availableQuantity: {
-    fontSize: 14,
+    // fontSize: 14,
+minWidth: 80,
     color: "#999999",
   },
   quantityControl: {
@@ -4919,27 +5413,27 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    width: '100%', 
-    maxWidth: '100%',
+    width: "100%",
+    maxWidth: "100%",
   },
   selectedCustomerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-     flex: 1,
-    width: '100%',
+    flex: 1,
+    width: "100%",
   },
   selectedCustomerName: {
     fontSize: 16,
     fontWeight: "600",
-     flexShrink: 1,
-    width: '100%',
+    flexShrink: 1,
+    width: "100%",
   },
   selectedCustomerMobile: {
     fontSize: 15,
     fontWeight: "500",
-     flexShrink: 1,
-    width: '100%',
+    flexShrink: 1,
+    width: "100%",
   },
   customerDropdown: {
     position: "absolute",
@@ -5100,6 +5594,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 5,
+     minHeight: 20, 
+    width: '100%', 
   },
   loadingModalContainer: {
     flex: 1,
@@ -5119,5 +5615,32 @@ const styles = StyleSheet.create({
   loadingModalText: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  phoneInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  countryCodeContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderRightWidth: 0,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    backgroundColor: "#f5f5f5",
+  },
+  countryCodeText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  phoneInput: {
+    flex: 1,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    fontSize: 16,
   },
 });

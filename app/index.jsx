@@ -5,9 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  useColorScheme,
+  useColorScheme,TextInput
 } from "react-native";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+
+
 
 export default function Index() {
   const router = useRouter();
@@ -38,12 +40,12 @@ export default function Index() {
       <View style={styles.content}>
         {/* Logo Image */}
         <Image
-          source={require("../assets/images/logo/RedlineLogo.png")}
+          source={require("../assets/images/logo/world-wide-logo.png")}
           style={styles.logo}
         />
 
         <Text style={[styles.title, { color: "white" }]}>
-          Welcome to <Text style={{ color: "red" }}>Red</Text>Line
+          Welcome to <Text style={{ color: "red" }}>World</Text>Wide
         </Text>
 
         <Text style={[styles.title, { color: "white" }]}>Motor Works Garage</Text>

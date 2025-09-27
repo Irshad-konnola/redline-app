@@ -21,7 +21,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { debounce } from 'lodash';
 import { router } from 'expo-router';
 import { DarkTheme, DefaultTheme } from '@react-navigation/native';
-// API service functions (you'll need to implement these based on your backend)
 import { fetchAccounts,fetchAccountGroups,fetchStoreProductsAll } from '../api/api';
 import axiosInstance from '../api/api';
 

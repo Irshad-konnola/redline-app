@@ -90,7 +90,7 @@ export default function Login() {
               <View style={styles.overlay}>
                 <View style={styles.logoContentContainer}>
                   <Image 
-                    source={require('../assets/images/logo/RedlineLogo.png')} 
+                    source={require('../assets/images/logo/world-wide-logo.png')} 
                     style={styles.logo}
                     resizeMode="contain"
                   />
