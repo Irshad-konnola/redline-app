@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "RedLine",
-    "slug": "RedLine",
+    "name": "WorldWide",
+    "slug": "WorldWide",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo/RedlineAppLogo.png",
-    "scheme": "RedLine",
+    "icon": "./assets/images/logo/world-wide-logo.png",
+    "scheme": "WorldWide",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -13,10 +13,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo/RedlineAppLogo.png",
+        "foregroundImage": "./assets/images/logo/world-wide-logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.redline.autogarage",
+      "package": "com.worldwide.autogarage",
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [],
       "jsEngine": "hermes"
@@ -25,14 +25,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logo/RedlineAppLogo.png"
+      "favicon": "./assets/images/logo/world-wide-logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo/RedlineAppLogo.png",
+          "image": "./assets/images/logo/world-wide-logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"

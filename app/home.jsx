@@ -248,7 +248,7 @@ const Home = () => {
             style={styles.backgroundImage}
           >
             <View style={styles.overlay}>
-              <Text style={styles.headerText}>Welcome to RedLine</Text>
+              <Text style={styles.headerText}>Welcome to WorldWide</Text>
             </View>
           </ImageBackground>
         </View>

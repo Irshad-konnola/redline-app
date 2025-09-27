@@ -1,4 +1,4 @@
-package com.redline.autogarage
+package com.worldwide.autogarage
 
 import android.app.Application
 import android.content.res.Configuration
