@@ -29,6 +29,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // import { axiosInstance } from '@/constants/api.config';
 import axiosInstance from "../api/api";
 import { FixedText } from "../components/FixedText";
+import { FixedTextInput } from "../components/FixedTextInput";
 const ValidationSchema = Yup.object().shape({
   customerName: Yup.string().required("Customer name is required"),
   mobileNumber: Yup.string()
@@ -1750,7 +1751,7 @@ export default function AddNewJobCard() {
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
-                                  Front View
+                                  Front
                                 </Text>
                               </View>
                             )}
@@ -1786,12 +1787,14 @@ export default function AddNewJobCard() {
                                 <FixedText
                                   fontSize={12}
                                   numberOfLines={1}
+                                  adjustsFontSizeToFit
+                                  minimumFontScale={0.8}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
-                                  Back View
+                                  Back
                                 </FixedText>
                               </View>
                             )}
@@ -1830,12 +1833,14 @@ export default function AddNewJobCard() {
                                 <FixedText
                                   fontSize={12}
                                   numberOfLines={1}
+                                  adjustsFontSizeToFit
+                                  minimumFontScale={0.8}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
-                                  Left View
+                                  Left
                                 </FixedText>
                               </View>
                             )}
@@ -1871,12 +1876,14 @@ export default function AddNewJobCard() {
                                 <FixedText
                                   fontSize={12}
                                   numberOfLines={1}
+                                  adjustsFontSizeToFit
+                                  minimumFontScale={0.8}
                                   style={[
                                     styles.imagePlaceholderText,
                                     { color: theme.placeholderColor },
                                   ]}
                                 >
-                                  Right View
+                                  Right
                                 </FixedText>
                               </View>
                             )}
@@ -1918,14 +1925,18 @@ export default function AddNewJobCard() {
                                 size={32}
                                 color={theme.placeholderColor}
                               />
-                              <Text
+                              <FixedText
+                                fontSize={12}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.8}
                                 style={[
                                   styles.imagePlaceholderText,
                                   { color: theme.placeholderColor },
                                 ]}
                               >
-                                Front Side
-                              </Text>
+                                Front
+                              </FixedText>
                             </View>
                           )}
                         </>
@@ -1957,14 +1968,18 @@ export default function AddNewJobCard() {
                                 size={32}
                                 color={theme.placeholderColor}
                               />
-                              <Text
+                              <FixedText
+                                fontSize={12}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.8}
                                 style={[
                                   styles.imagePlaceholderText,
                                   { color: theme.placeholderColor },
                                 ]}
                               >
-                                Back Side
-                              </Text>
+                                Back
+                              </FixedText>
                             </View>
                           )}
                         </>
@@ -2041,14 +2056,17 @@ export default function AddNewJobCard() {
                       size={24}
                       color={theme.placeholderColor}
                     />
-                    <Text
-                      style={[
+<FixedText
+              fontSize={16}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}                      style={[
                         styles.addServiceButtonText,
                         { color: theme.placeholderColor },
                       ]}
                     >
                       Add Service
-                    </Text>
+                    </FixedText>
                   </TouchableOpacity>
                   {/* Added Services List */}
                   {addedServices.length > 0 && (
@@ -2488,14 +2506,18 @@ export default function AddNewJobCard() {
                       size={24}
                       color={theme.placeholderColor}
                     />
-                    <Text
+                   <FixedText
+              fontSize={16}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8} 
                       style={[
                         styles.addServiceButtonText,
                         { color: theme.placeholderColor },
                       ]}
                     >
                       Add Products
-                    </Text>
+                    </FixedText>
                   </TouchableOpacity>
                   {selectedProducts.length > 0 && (
                     <View style={styles.selectedItemsSection}>
@@ -2650,26 +2672,30 @@ export default function AddNewJobCard() {
                                               <FixedText
                                                 fontSize={12}
                                                 numberOfLines={1}
-                                               style={[
-      styles.productPrice,
-      {
-        color: isDark ? "#63B3ED" : "#2196F3",
-        flex: 1, // Allow it to take available space
-        marginRight: 10, // Add some spacing
-      },
-    ]}
+                                                style={[
+                                                  styles.productPrice,
+                                                  {
+                                                    color: isDark
+                                                      ? "#63B3ED"
+                                                      : "#2196F3",
+                                                    flex: 1, // Allow it to take available space
+                                                    marginRight: 10, // Add some spacing
+                                                  },
+                                                ]}
                                               >
                                                 QAR {product.price}
                                               </FixedText>
                                               <FixedText
                                                 fontSize={12}
                                                 numberOfLines={1}
+                                                adjustsFontSizeToFit
+                                                minimumFontScale={0.8}
                                                 style={[
                                                   styles.availableQuantity,
                                                   {
                                                     color:
                                                       theme.placeholderColor,
-                                                      flexShrink: 0,
+                                                    flexShrink: 0,
                                                   },
                                                 ]}
                                               >
@@ -2947,7 +2973,7 @@ export default function AddNewJobCard() {
                                 color: theme.textColor,
                               },
                             ]}
-                            placeholder="Search customer by name or mobile"
+                            placeholder="Search customer"
                             placeholderTextColor={theme.placeholderColor}
                             value={customerSearchQuery}
                             onChangeText={handleCustomerSearch}
@@ -4267,7 +4293,11 @@ export default function AddNewJobCard() {
                             ]}
                             onPress={() => setWorkStatusValue(status.value)}
                           >
-                            <Text
+                            <FixedText
+                              fontSize={12}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.8}
                               style={[
                                 styles.statusButtonText,
                                 {
@@ -4279,7 +4309,7 @@ export default function AddNewJobCard() {
                               ]}
                             >
                               {status.label}
-                            </Text>
+                            </FixedText>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -4307,7 +4337,11 @@ export default function AddNewJobCard() {
                             ]}
                             onPress={() => setPriority(priorityOption)}
                           >
-                            <Text
+                            <FixedText
+                              fontSize={12}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.8}
                               style={[
                                 styles.statusButtonText,
                                 {
@@ -4320,7 +4354,7 @@ export default function AddNewJobCard() {
                             >
                               {priorityOption.charAt(0).toUpperCase() +
                                 priorityOption.slice(1)}
-                            </Text>
+                            </FixedText>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -4449,7 +4483,8 @@ export default function AddNewJobCard() {
                       >
                         Discount:
                       </Text>
-                      <TextInput
+                      <FixedTextInput
+                        fontSize={12}
                         style={[
                           styles.discountInput,
                           {
@@ -4458,7 +4493,7 @@ export default function AddNewJobCard() {
                           },
                         ]}
                         keyboardType="numeric"
-                        placeholder="Enter discount"
+                        placeholder="Enter discount amount"
                         placeholderTextColor={theme.placeholderColor}
                         value={discount}
                         onChangeText={setDiscount}
@@ -4493,7 +4528,8 @@ export default function AddNewJobCard() {
                       >
                         Advance Amount:
                       </Text>
-                      <TextInput
+                      <FixedTextInput
+                        fontSize={12}
                         style={[
                           styles.advanceInput,
                           {
@@ -4561,14 +4597,18 @@ export default function AddNewJobCard() {
                       {isSubmitting ? (
                         <ActivityIndicator size="small" color="#ffffff" />
                       ) : (
-                        <Text
+                        <FixedText
+                          fontSize={12}
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.8}
                           style={[
                             styles.submitButtonText,
                             { color: theme.buttonText },
                           ]}
                         >
                           Submit
-                        </Text>
+                        </FixedText>
                       )}
                     </TouchableOpacity>
                   </View>
@@ -4767,7 +4807,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   statusButtonText: {
-    fontSize: 14,
+    // fontSize: 14,
     fontWeight: "500",
   },
   selectInput: {
@@ -5258,15 +5298,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 8,
-    width: 120,
-    textAlign: "right",
+    minWidth: 120,
+    flexGrow: 1,
+    textAlign: "left",
   },
   advanceInput: {
     borderWidth: 1,
     borderRadius: 8,
     padding: 8,
-    width: 120,
-    textAlign: "right",
+    minWidth: 120,
+    flexGrow: 1,
+    textAlign: "left",
   },
   serviceMainInfo: {
     flex: 1,
@@ -5372,7 +5414,7 @@ const styles = StyleSheet.create({
   },
   availableQuantity: {
     // fontSize: 14,
-minWidth: 80,
+    minWidth: 20,
     color: "#999999",
   },
   quantityControl: {
@@ -5594,8 +5636,8 @@ minWidth: 80,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 5,
-     minHeight: 20, 
-    width: '100%', 
+    minHeight: 20,
+    width: "100%",
   },
   loadingModalContainer: {
     flex: 1,

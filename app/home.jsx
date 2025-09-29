@@ -22,7 +22,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import axiosInstance from "../api/api.js";
 import { createStackNavigator } from "@react-navigation/stack";
-
+import { FixedText } from "../components/FixedText.js";
 const { width, height } = Dimensions.get("window"); // Get device width and height
 
 const Stack = createStackNavigator();
@@ -248,7 +248,11 @@ const Home = () => {
             style={styles.backgroundImage}
           >
             <View style={styles.overlay}>
-              <Text style={styles.headerText}>Welcome to WorldWide</Text>
+              <FixedText
+                            fontSize={28}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}  style={styles.headerText}>Welcome to WorldWide</FixedText>
             </View>
           </ImageBackground>
         </View>
@@ -643,7 +647,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: "#fff",
-    fontSize: 28,
+    // fontSize: 28,
     fontWeight: "bold",
   },
   contentContainer: {
