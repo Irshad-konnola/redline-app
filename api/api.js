@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
 // export const BaseURL = 'http://192.168.1.14:8000';
-export const BaseURL = 'https://erp-motogarage-worldwide-2.up.railway.app';
+export const BaseURL = 'https://erp-motogarage-staging-worldwide.up.railway.app';
 // export const BaseURL = 'https://admin-redline-motogarage.up.railway.app';
 
 // Create a ref to store the modal visibility state
@@ -16,7 +16,7 @@ export const setSessionExpiredModalHandler = (handler) => {
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: 'https://erp-motogarage-worldwide-2.up.railway.app/api',
+  baseURL: 'https://erp-motogarage-staging-worldwide.up.railway.app/api',
     // baseURL: 'https://admin-redline-motogarage.up.railway.app/api',
 
   headers: {

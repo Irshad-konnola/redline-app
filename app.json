@@ -1,40 +1,45 @@
 {
   "expo": {
     "name": "WorldWide",
-    "slug": "WorldWide",
+    "slug": "worldwide",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo/world-wide-logo.png",
-    "scheme": "WorldWide",
+    "icon": "./assets/images/logo/world-wide.png",
+    "scheme": "worldwide",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.worldwide.autogarage"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo/world-wide-logo.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.worldwide.autogarage",
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [],
       "jsEngine": "hermes"
-
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logo/world-wide-logo.png"
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo/world-wide-logo.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ]
