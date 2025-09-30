@@ -28,7 +28,7 @@ import {
   GestureHandlerRootView,
   Swipeable,
 } from "react-native-gesture-handler";
-
+import { FixedText } from "../components/FixedText";
 const filterOptions = [
   { label: "Priority-Low", value: "low" },
   { label: "Priority-Medium", value: "medium" },
@@ -622,14 +622,14 @@ const Projects = () => {
       </View>
 
       <View style={styles.cardRow}>
-        <Text
-          style={[
-            styles.infoText,
+<FixedText
+                        fontSize={14}          style={[
+            styles.infoTextNo,
             { color: extendedTheme.colors.secondaryText },
           ]}
         >
           Mobile No: {item.mobile_number}
-        </Text>
+        </FixedText>
         <View style={styles.statusContainer}>
           <Text
             style={[
@@ -650,14 +650,15 @@ const Projects = () => {
       </View>
 
       <View style={styles.cardRow}>
-        <Text
+        <FixedText
+          fontSize={14}
           style={[
-            styles.infoText,
+            styles.infoTextNo,
             { color: extendedTheme.colors.secondaryText },
           ]}
         >
           Date In: {formatDate(item.service_date)}
-        </Text>
+        </FixedText>
         <View style={styles.priorityContainer}>
           <Text
             style={[
@@ -681,26 +682,27 @@ const Projects = () => {
       </View>
 
       <View style={styles.cardRow}>
-        <Text
+        <FixedText
+        fontSize={14}
           style={[
-            styles.infoText,
+            styles.infoTextNo,
             { color: extendedTheme.colors.secondaryText },
           ]}
         >
           Estimate Delivery:{" "}
           {formatDate(item.estimated_date) || "Not specified"}
-        </Text>
+        </FixedText>
       </View>
 
       <View style={styles.cardFooter}>
-        <Text
-          style={[
-            styles.infoText,
+<FixedText
+          fontSize={14}          style={[
+            styles.infoTextNo,
             { color: extendedTheme.colors.secondaryText },
           ]}
         >
           Date Out: {formatDate(item.date_out) || "Nill"}
-        </Text>
+        </FixedText>
       </View>
     </TouchableOpacity>
   );
@@ -1310,7 +1312,11 @@ const Projects = () => {
                 { backgroundColor: extendedTheme.colors.overlayBg },
               ]}
             >
-              <Text style={styles.headerText}>Projects</Text>
+             <FixedText
+                           fontSize={28}
+                           numberOfLines={1}
+                           adjustsFontSizeToFit
+                           minimumFontScale={0.8} style={styles.headerText}>Projects</FixedText>
             </View>
           </ImageBackground>
         </View>
@@ -1523,7 +1529,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: "#fff",
-    fontSize: 28,
+    // fontSize: 28,
     fontWeight: "bold",
   },
   contentContainer: {
@@ -1619,8 +1625,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
+ infoTextNo: {
+    // fontSize: 14,
+    minHeight:35
+  },
   infoText: {
-    fontSize: 14,
+    // fontSize: 14,
+    // minHeight:35
   },
   statusContainer: {
     flexDirection: "row",

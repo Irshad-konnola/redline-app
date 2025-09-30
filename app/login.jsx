@@ -5,7 +5,7 @@ import { useState } from "react";
 import axiosInstance from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-
+import { FixedText } from "../components/FixedText";
 const { width, height } = Dimensions.get('window');
 
 export default function Login() {
@@ -188,9 +188,13 @@ export default function Login() {
                     onPress={handleLogin}
                     disabled={loading}
                   >
-                    <Text style={styles.loginButtonText}>
+                    <FixedText 
+                                 fontSize={16}
+                                 numberOfLines={1}
+                                  adjustsFontSizeToFit
+                     minimumFontScale={0.8}style={styles.loginButtonText}>
                       {loading ? 'Logging in...' : 'Login'}
-                    </Text>
+                    </FixedText>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: "#fff",
-    fontSize: 16,
+    // fontSize: 16,
     fontWeight: "600",
   },
   registerContainer: {

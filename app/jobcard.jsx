@@ -229,7 +229,7 @@ const JobCard = () => {
   const [filterValue, setFilterValue] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [jobCards, setJobCards] = useState([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -297,7 +297,7 @@ const JobCard = () => {
       let url = "job-cards/simple-list/";
       const params = new URLSearchParams();
 
-          params.append("is_estimated", "False");
+      params.append("is_estimated", "False");
 
       if (filterValue) {
         if (["pending", "in_progress", "completed"].includes(filterValue)) {
@@ -318,13 +318,15 @@ const JobCard = () => {
 
       const response = await axiosInstance.get(url);
       // Ensure vehicle_out is boolean
-      const processedData = response.data.map((job) => ({
-        ...job,
-        vehicle_out: Boolean(job.vehicle_out),
-      }))
-       .sort(
-        (a, b) => new Date(b.date_in).getTime() - new Date(a.date_in).getTime()
-      );
+      const processedData = response.data
+        .map((job) => ({
+          ...job,
+          vehicle_out: Boolean(job.vehicle_out),
+        }))
+        .sort(
+          (a, b) =>
+            new Date(b.date_in).getTime() - new Date(a.date_in).getTime()
+        );
 
       setJobCards(processedData);
       setError(null);
@@ -694,11 +696,10 @@ const JobCard = () => {
 
         <View style={styles.cardRow}>
           <FixedText
-                        fontSize={14}
-
+            fontSize={14}
             style={[
               styles.infoTextNo,
-              { color: extendedTheme.colors.secondaryText, },
+              { color: extendedTheme.colors.secondaryText },
             ]}
           >
             Mobile No: {job.mobile_number}
@@ -715,19 +716,22 @@ const JobCard = () => {
             <View
               style={[styles.statusBadge, getStatusStyle(job.job_card_status)]}
             >
-              <Text style={styles.statusText}>
+               <FixedText 
+                            fontSize={12}
+                            numberOfLines={1}
+                             adjustsFontSizeToFit
+                minimumFontScale={0.8} style={styles.statusText}>
                 {formatStatus(job.job_card_status)}
-              </Text>
+              </FixedText>
             </View>
           </View>
         </View>
 
         <View style={styles.cardRow}>
           <FixedText
-                        fontSize={14}
-              numberOfLines={1}
+            fontSize={14}
             style={[
-              styles.infoText,
+              styles.infoTextNo,
               { color: extendedTheme.colors.secondaryText },
             ]}
           >
@@ -748,34 +752,40 @@ const JobCard = () => {
                 getPriorityStyle(job.priority_status),
               ]}
             >
-              <Text style={styles.priorityText}>
+               <FixedText 
+                            fontSize={12}
+                            numberOfLines={1}
+                             adjustsFontSizeToFit
+                minimumFontScale={0.8} style={styles.priorityText}>
                 {formatPriority(job.priority_status)}
-              </Text>
+              </FixedText>
             </View>
           </View>
         </View>
 
         <View style={styles.cardRow}>
-          <Text
+          <FixedText
+            fontSize={14}
             style={[
-              styles.infoText,
+              styles.infoTextNo,
               { color: extendedTheme.colors.secondaryText },
             ]}
           >
             Estimate Delivery:{" "}
             {formatDate(job.estimated_date) || "Not specified"}
-          </Text>
+          </FixedText>
         </View>
 
         <View style={styles.cardFooter}>
-          <Text
+          <FixedText
+            fontSize={14}
             style={[
-              styles.infoText,
+              styles.infoTextNo,
               { color: extendedTheme.colors.secondaryText },
             ]}
           >
             Date Out: {formatDate(job.date_out) || "Nill"}
-          </Text>
+          </FixedText>
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={[
@@ -843,7 +853,11 @@ const JobCard = () => {
               { backgroundColor: extendedTheme.colors.overlayBg },
             ]}
           >
-            <Text style={[styles.headerText]}>Job Cards</Text>
+            <FixedText
+                          fontSize={28}
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.8} style={[styles.headerText]}>Job Cards</FixedText>
           </View>
         </ImageBackground>
       </View>
@@ -930,7 +944,11 @@ const JobCard = () => {
             onPress={handleAddNew}
             activeOpacity={0.7}
           >
-            <Text style={styles.addButtonText}>+ Add New</Text>
+             <FixedText 
+                          fontSize={14}
+                          numberOfLines={1}
+                           adjustsFontSizeToFit
+              minimumFontScale={0.8} style={styles.addButtonText}>+ Add New</FixedText>
           </TouchableOpacity>
 
           {/* Quick Sale Button */}
@@ -949,7 +967,11 @@ const JobCard = () => {
             onPress={handleQuickSale}
             activeOpacity={0.7}
           >
-            <Text style={styles.addButtonText}>Sale</Text>
+             <FixedText 
+                          fontSize={14}
+                          numberOfLines={1}
+                           adjustsFontSizeToFit
+              minimumFontScale={0.8} style={styles.addButtonText}>Sale</FixedText>
           </TouchableOpacity>
         </View>
 
@@ -1079,7 +1101,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: "#fff",
-    fontSize: 28,
+    // fontSize: 28,
     fontWeight: "bold",
   },
   contentContainer: {
@@ -1118,7 +1140,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: "#fff",
-    fontSize: 16,
+    // fontSize: 16,
     fontWeight: "500",
   },
   scrollView: {
@@ -1159,9 +1181,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
-   infoTextNo: {
+  infoTextNo: {
     // fontSize: 14,
-    minHeight:35
+    minHeight: 35,
   },
   infoText: {
     // fontSize: 14,
@@ -1179,7 +1201,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: "#fff",
-    fontSize: 12,
+    // fontSize: 12,
     fontWeight: "500",
   },
   priorityContainer: {
@@ -1194,7 +1216,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     color: "#fff",
-    fontSize: 12,
+    // fontSize: 12,
     fontWeight: "500",
   },
   cardFooter: {

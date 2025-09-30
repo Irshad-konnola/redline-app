@@ -4,7 +4,7 @@ import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import BottomNavBar from '../components/BottomNavBar';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
-
+import { FixedText } from '../components/FixedText';
 const Profile = () => {
   const colorScheme = useColorScheme();
   const router = useRouter();
@@ -53,7 +53,11 @@ const Profile = () => {
               style={styles.logoutButton}
               onPress={handleLogout}
             >
-              <Text style={styles.logoutButtonText}>Logout</Text>
+                 <FixedText
+                            fontSize={16}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}  style={styles.logoutButtonText}>Logout</FixedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -122,7 +126,7 @@ const styles = StyleSheet.create({
   },
   logoutButtonText: {
     color: '#fff',
-    fontSize: 16,
+    // fontSize: 16,
     fontWeight: '600',
   },
   bottomNavContainer: {
